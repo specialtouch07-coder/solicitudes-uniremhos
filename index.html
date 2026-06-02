@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -377,7 +376,9 @@ function toggleSections() {
   document.getElementById('sec-03b').classList.toggle('visible', tipo === 'Requisición general de comunicación');
 }
 
-function guardarSolicitud() {
+const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbz1gjJ_qd0Xfhy9kFa34FxZBfXiqnWv20Aga29UCYX05ffV4BNPsPolN2V8oG4xHslx/exec';
+
+async function guardarSolicitud() {
   const area = val('area'), responsable = val('responsable'),
         correo = val('correo'), fecha_limite = val('fecha_limite'), tipo = getRadio('tipo');
 
@@ -387,7 +388,6 @@ function guardarSolicitud() {
   }
 
   const solicitud = {
-    id: Date.now(),
     fecha_registro: new Date().toISOString(),
     area, fecha_solicitud: val('fecha_solicitud'), responsable,
     whatsapp: val('whatsapp'), correo, tipo,
@@ -412,11 +412,37 @@ function guardarSolicitud() {
     referencias: val('referencias'), observaciones: val('observaciones_gen'),
   };
 
+  // Guardar localmente también como respaldo
   const data = getData();
-  data.push(solicitud);
+  data.push({ id: Date.now(), ...solicitud });
   saveData(data);
-  limpiarFormulario();
-  showToast('Solicitud guardada correctamente.');
+
+  // Mostrar estado de envío
+  const btn = document.querySelector('.btn-primary');
+  btn.textContent = 'Enviando...';
+  btn.disabled = true;
+
+  try {
+    await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(solicitud)
+    });
+
+    limpiarFormulario();
+    btn.textContent = 'Guardar solicitud';
+    btn.disabled = false;
+
+    showToast('✓ Solicitud enviada a Google Sheets correctamente.');
+  } catch (err) {
+    btn.textContent = 'Guardar solicitud';
+    btn.disabled = false;
+    limpiarFormulario();
+    showToast('Guardado localmente. Sin conexión al servidor.');
+    console.error('Webhook error:', err);
+  }
+
   showTab('registro');
 }
 
