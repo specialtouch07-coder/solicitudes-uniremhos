@@ -1,0 +1,685 @@
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solicitudes de Promoción — UNIREMHOS</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --blue-dark: #1F4E79; --blue-mid: #2E75B6; --blue-light: #D6E4F0;
+    --gray-bg: #F5F7FA; --gray-mid: #E2E8F0; --gray-text: #64748B;
+    --text: #1E293B; --white: #FFFFFF;
+    --green: #16A34A; --red: #DC2626; --amber: #D97706;
+  }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--gray-bg); color: var(--text); font-size: 14px; }
+  header { background: var(--blue-dark); color: white; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; }
+  header h1 { font-size: 17px; font-weight: 600; }
+  header p { font-size: 12px; opacity: 0.7; margin-top: 2px; }
+  .tabs { display: flex; gap: 0; border-bottom: 2px solid var(--gray-mid); background: white; padding: 0 24px; }
+  .tab { padding: 12px 20px; cursor: pointer; font-size: 13px; font-weight: 500; color: var(--gray-text); border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all .15s; }
+  .tab.active { color: var(--blue-mid); border-bottom-color: var(--blue-mid); }
+  .tab:hover:not(.active) { color: var(--text); }
+  .view { display: none; padding: 24px; }
+  .view.active { display: block; }
+
+  /* ── FORMULARIO ── */
+  .form-card { background: white; border-radius: 10px; border: 1px solid var(--gray-mid); overflow: hidden; margin-bottom: 16px; }
+  .form-card-header { background: var(--blue-dark); color: white; padding: 10px 18px; font-size: 13px; font-weight: 600; letter-spacing: .03em; }
+  .form-card-body { padding: 18px; display: grid; gap: 14px; }
+  .fg { display: flex; flex-direction: column; gap: 5px; }
+  .fg label { font-size: 12px; font-weight: 600; color: var(--gray-text); text-transform: uppercase; letter-spacing: .04em; }
+  .fg input, .fg select, .fg textarea {
+    border: 1px solid var(--gray-mid); border-radius: 6px; padding: 8px 12px;
+    font-size: 13px; font-family: inherit; background: white; color: var(--text);
+    transition: border .15s;
+  }
+  .fg input:focus, .fg select:focus, .fg textarea:focus { outline: none; border-color: var(--blue-mid); box-shadow: 0 0 0 3px rgba(46,117,182,.1); }
+  .fg textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  .check-wrap { display: flex; flex-wrap: wrap; gap: 8px 16px; }
+  .check-item { display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; }
+  .check-item input { width: 15px; height: 15px; cursor: pointer; accent-color: var(--blue-mid); }
+  .note { background: #FFFBEB; border-left: 3px solid var(--amber); border-radius: 0 6px 6px 0; padding: 10px 14px; font-size: 12px; color: #92400E; line-height: 1.6; }
+  .btn-primary { background: var(--blue-mid); color: white; border: none; border-radius: 8px; padding: 11px 28px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background .15s; }
+  .btn-primary:hover { background: var(--blue-dark); }
+  .btn-secondary { background: white; color: var(--blue-mid); border: 1.5px solid var(--blue-mid); border-radius: 8px; padding: 9px 20px; font-size: 13px; font-weight: 500; cursor: pointer; }
+  .btn-secondary:hover { background: var(--blue-light); }
+  .btn-danger { background: white; color: var(--red); border: 1.5px solid var(--red); border-radius: 6px; padding: 5px 12px; font-size: 12px; cursor: pointer; }
+  .form-actions { display: flex; gap: 12px; align-items: center; padding: 0 0 8px; }
+  .subsection-note { font-size: 11px; color: var(--gray-text); font-style: italic; padding: 6px 0 0; }
+  .condional-section { border-left: 3px solid var(--blue-light); padding-left: 14px; display: none; }
+  .condional-section.visible { display: block; }
+
+  /* ── TABLA ── */
+  .toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+  .toolbar input { flex: 1; min-width: 180px; border: 1px solid var(--gray-mid); border-radius: 6px; padding: 8px 12px; font-size: 13px; }
+  .toolbar select { border: 1px solid var(--gray-mid); border-radius: 6px; padding: 8px 12px; font-size: 13px; background: white; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .badge-lanzamiento { background: #DBEAFE; color: #1D4ED8; }
+  .badge-general { background: #F3E8FF; color: #7C3AED; }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th { background: var(--blue-dark); color: white; padding: 10px 14px; text-align: left; font-weight: 600; font-size: 12px; white-space: nowrap; }
+  tbody tr { border-bottom: 1px solid var(--gray-mid); }
+  tbody tr:hover { background: var(--blue-light); }
+  tbody td { padding: 10px 14px; vertical-align: top; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .td-actions { display: flex; gap: 6px; }
+
+  /* ── STATS ── */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 24px; }
+  .stat-card { background: white; border: 1px solid var(--gray-mid); border-radius: 10px; padding: 16px 18px; }
+  .stat-card .num { font-size: 28px; font-weight: 700; color: var(--blue-mid); }
+  .stat-card .lbl { font-size: 12px; color: var(--gray-text); margin-top: 4px; }
+  /* PRIORITY BADGES */
+  .p1{background:#FDECEA;color:#B91C1C;border:1px solid #FCA5A5;}
+  .p2{background:#FEF3C7;color:#92400E;border:1px solid #FCD34D;}
+  .p3{background:#DBEAFE;color:#1D4ED8;border:1px solid #93C5FD;}
+  .p4{background:#F3F4F6;color:#374151;border:1px solid #D1D5DB;}
+  .priority-banner{border-radius:8px;padding:14px 16px;margin-top:12px;display:flex;align-items:center;gap:14px;}
+  .priority-banner.p1-bg{background:#FDECEA;border:1.5px solid #FCA5A5;}
+  .priority-banner.p2-bg{background:#FEF3C7;border:1.5px solid #FCD34D;}
+  .priority-banner.p3-bg{background:#DBEAFE;border:1.5px solid #93C5FD;}
+  .priority-banner.p4-bg{background:#F3F4F6;border:1.5px solid #D1D5DB;}
+  .priority-level{font-size:22px;font-weight:700;min-width:40px;}
+  .p1-bg .priority-level{color:#B91C1C;}
+  .p2-bg .priority-level{color:#92400E;}
+  .p3-bg .priority-level{color:#B45309;}
+  .p4-bg .priority-level{color:#374151;}
+  .priority-info{}
+  .priority-title{font-size:13px;font-weight:600;color:var(--text);}
+  .priority-desc{font-size:12px;color:var(--gray-text);margin-top:3px;}
+  .priority-time{font-size:12px;font-weight:600;margin-top:4px;}
+  .p1-bg .priority-time{color:#B91C1C;}
+  .p2-bg .priority-time{color:#92400E;}
+  .p3-bg .priority-time{color:#1D4ED8;}
+  .p4-bg .priority-time{color:#374151;}
+  .success-toast { position: fixed; bottom: 24px; right: 24px; background: var(--green); color: white; padding: 12px 20px; border-radius: 8px; font-size: 13px; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,.15); transition: opacity .3s; z-index: 999; }
+  .empty-state { text-align: center; padding: 48px 24px; color: var(--gray-text); }
+  .empty-state svg { opacity: .3; margin-bottom: 12px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Sistema de Solicitudes — Educación Continua y Promoción</h1>
+    <p>Universidad UNIREMHOS · 2026</p>
+  </div>
+  <div style="font-size:12px;opacity:.6;">Uso interno</div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab('nueva')">+ Nueva solicitud</div>
+  <div class="tab" onclick="showTab('registro')">Registro</div>
+  <div class="tab" onclick="showTab('estadisticas')">Estadísticas</div>
+</div>
+
+<!-- ══ NUEVA SOLICITUD ══════════════════════════════════════════════════ -->
+<div id="view-nueva" class="view active">
+
+  <div class="form-card">
+    <div class="form-card-header">01 · Identificación de la solicitud</div>
+    <div class="form-card-body">
+      <div class="grid2">
+        <div class="fg">
+          <label>Área / Departamento *</label>
+          <select id="area" onchange="calcularPrioridad()">
+            <option value="">— Selecciona el área —</option>
+            <optgroup label="P1 — Urgente (≤ 24 horas)">
+              <option value="Rectoría">Rectoría</option>
+              <option value="Vicerrectoría Académica">Vicerrectoría Académica</option>
+              <option value="Vicerrectoría Administrativa">Vicerrectoría Administrativa</option>
+            </optgroup>
+            <optgroup label="P2 — Alta (≤ 48 horas)">
+              <option value="Educación Continua y Promoción">Educación Continua y Promoción</option>
+            </optgroup>
+            <optgroup label="P3 — Normal (≤ 72 horas)">
+              <option value="Decanato de Ciencias de la Salud">Decanato de Ciencias de la Salud</option>
+              <option value="Decanato de Ciencias Jurídicas">Decanato de Ciencias Jurídicas</option>
+              <option value="Decanato de Ciencias Económicas">Decanato de Ciencias Económicas</option>
+              <option value="Escuela de Enfermería">Escuela de Enfermería</option>
+              <option value="Escuela de Medicina">Escuela de Medicina</option>
+              <option value="Escuela de Derecho">Escuela de Derecho</option>
+              <option value="Escuela de Sistemas Computacionales">Escuela de Sistemas Computacionales</option>
+              <option value="Escuela de Odontología">Escuela de Odontología</option>
+              <option value="Escuela de Psicología Educativa">Escuela de Psicología Educativa</option>
+              <option value="Escuela de Administración de Empresas">Escuela de Administración de Empresas</option>
+              <option value="Escuela de Contabilidad y Auditoría">Escuela de Contabilidad y Auditoría</option>
+              <option value="Escuela de Mercadología">Escuela de Mercadología</option>
+              <option value="Escuela de Ciencias de la Comunicación Social">Escuela de Ciencias de la Comunicación Social</option>
+              <option value="Otra área académica">Otra área académica</option>
+            </optgroup>
+            <optgroup label="P4 — Planificado (Agenda semanal)">
+              <option value="Sin fecha crítica — trabajo planificado">Sin fecha crítica — trabajo planificado</option>
+            </optgroup>
+          </select>
+        </div>
+        <div id="priority-banner" style="display:none;grid-column:span 2;"></div>
+        <div class="fg"><label>Fecha de solicitud *</label><input id="fecha_solicitud" type="date"></div>
+      </div>
+      <div class="grid2">
+        <div class="fg"><label>Nombre del responsable *</label><input id="responsable" type="text" placeholder="Quien gestiona esta solicitud"></div>
+        <div class="fg"><label>Ext. / WhatsApp</label><input id="whatsapp" type="text" placeholder="Número de contacto"></div>
+      </div>
+      <div class="fg"><label>Correo electrónico *</label><input id="correo" type="email" placeholder="correo@uniremhos.edu.do"></div>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <div class="form-card-header">02 · Tipo de solicitud</div>
+    <div class="form-card-body">
+      <div class="fg">
+        <label>Tipo *</label>
+        <div class="check-wrap">
+          <label class="check-item"><input type="radio" name="tipo" value="Lanzamiento de oferta académica" onchange="toggleSections()"> Lanzamiento de oferta académica</label>
+          <label class="check-item"><input type="radio" name="tipo" value="Requisición general de comunicación" onchange="toggleSections()"> Requisición general de comunicación</label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 03A -->
+  <div class="form-card condional-section" id="sec-03a">
+    <div class="form-card-header">03A · Información de oferta académica</div>
+    <div class="form-card-body">
+      <p class="subsection-note">Complete únicamente si marcó "Lanzamiento de oferta académica".</p>
+      <div class="fg"><label>Nombre del programa</label><input id="prog_nombre" type="text" placeholder="Nombre completo tal como se comunicará al público"></div>
+      <div class="grid2">
+        <div class="fg"><label>Escuela / Área responsable</label><input id="prog_escuela" type="text"></div>
+        <div class="fg">
+          <label>Modalidad</label>
+          <div class="check-wrap">
+            <label class="check-item"><input type="checkbox" name="modalidad" value="Presencial"> Presencial</label>
+            <label class="check-item"><input type="checkbox" name="modalidad" value="Virtual"> Virtual</label>
+            <label class="check-item"><input type="checkbox" name="modalidad" value="Híbrida"> Híbrida</label>
+            <label class="check-item"><input type="checkbox" name="modalidad" value="Por definir"> Por definir</label>
+          </div>
+        </div>
+      </div>
+      <div class="fg">
+        <label>Dirigido a</label>
+        <div class="check-wrap">
+          <label class="check-item"><input type="checkbox" name="dirigido" value="Estudiantes activos"> Estudiantes activos</label>
+          <label class="check-item"><input type="checkbox" name="dirigido" value="Egresados"> Egresados</label>
+          <label class="check-item"><input type="checkbox" name="dirigido" value="Profesionales externos"> Profesionales externos</label>
+          <label class="check-item"><input type="checkbox" name="dirigido" value="Público general"> Público general</label>
+          <label class="check-item"><input type="checkbox" name="dirigido" value="Empresas / Instituciones"> Empresas / Instituciones</label>
+        </div>
+      </div>
+      <div class="fg"><label>Descripción breve</label><textarea id="prog_descripcion" placeholder="¿De qué trata? ¿Qué aprenderá el participante?"></textarea></div>
+      <div class="grid3">
+        <div class="fg"><label>Fecha de inicio prevista</label><input id="prog_inicio" type="date"></div>
+        <div class="fg"><label>Duración</label><input id="prog_duracion" type="text" placeholder="Ej. 3 meses / 40 horas"></div>
+        <div class="fg"><label>Cupo máximo</label><input id="prog_cupo" type="text" placeholder="No. participantes"></div>
+      </div>
+      <div class="grid2">
+        <div class="fg"><label>Horario previsto</label><input id="prog_horario" type="text" placeholder="Días y horas"></div>
+        <div class="fg"><label>Costo</label><input id="prog_costo" type="text" placeholder="RD$ o gratuito"></div>
+      </div>
+      <div class="fg"><label>Facilitador / Docente</label><input id="prog_facilitador" type="text" placeholder="Nombre y credencial"></div>
+      <div class="fg"><label>Requisitos de participación</label><textarea id="prog_requisitos" placeholder="Formación previa, documentos, etc."></textarea></div>
+      <div class="fg"><label>Puntos clave para la comunicación</label><textarea id="prog_puntos" placeholder="¿Qué debe resaltarse en los materiales?"></textarea></div>
+      <div class="fg"><label>Pre-requisito</label><textarea id="prog_prereq" placeholder="Conocimientos o documentación previa requerida"></textarea></div>
+      <div class="fg"><label>Observaciones adicionales</label><textarea id="prog_obs"></textarea></div>
+    </div>
+  </div>
+
+  <!-- 03B -->
+  <div class="form-card condional-section" id="sec-03b">
+    <div class="form-card-header">03B · Información de requisición general</div>
+    <div class="form-card-body">
+      <p class="subsection-note">Complete únicamente si marcó "Requisición general de comunicación".</p>
+      <div class="fg">
+        <label>Tipo de pieza solicitada</label>
+        <div class="check-wrap">
+          <label class="check-item"><input type="checkbox" name="pieza" value="Flyer digital"> Flyer digital</label>
+          <label class="check-item"><input type="checkbox" name="pieza" value="Flyer impreso"> Flyer impreso</label>
+          <label class="check-item"><input type="checkbox" name="pieza" value="Banner / Afiche"> Banner / Afiche</label>
+          <label class="check-item"><input type="checkbox" name="pieza" value="Pieza Instagram/Facebook"> Instagram/Facebook</label>
+          <label class="check-item"><input type="checkbox" name="pieza" value="Story / Reel"> Story / Reel</label>
+          <label class="check-item"><input type="checkbox" name="pieza" value="Comunicado interno"> Comunicado interno</label>
+          <label class="check-item"><input type="checkbox" name="pieza" value="Comunicado externo"> Comunicado externo</label>
+          <label class="check-item"><input type="checkbox" name="pieza" value="Invitación a evento"> Invitación a evento</label>
+          <label class="check-item"><input type="checkbox" name="pieza" value="Reconocimiento / Diploma"> Reconocimiento / Diploma</label>
+          <label class="check-item"><input type="checkbox" name="pieza" value="Presentación PPT"> Presentación PPT</label>
+        </div>
+      </div>
+      <div class="fg"><label>Propósito de la pieza</label><textarea id="req_proposito" placeholder="¿Para qué se usará? ¿Qué se quiere comunicar?"></textarea></div>
+      <div class="fg">
+        <label>Texto ya redactado</label>
+        <div class="check-wrap">
+          <label class="check-item"><input type="radio" name="texto_status" value="Sí — lo adjunto"> Sí — lo adjunto</label>
+          <label class="check-item"><input type="radio" name="texto_status" value="No — necesito apoyo con el copy"> No — necesito apoyo</label>
+          <label class="check-item"><input type="radio" name="texto_status" value="Parcialmente redactado"> Parcialmente redactado</label>
+        </div>
+      </div>
+      <div class="fg"><label>Texto principal</label><textarea id="req_texto" placeholder="Pegue aquí el texto que desea incluir en la pieza"></textarea></div>
+      <div class="fg">
+        <label>¿Incluye imágenes o fotografías?</label>
+        <div class="check-wrap">
+          <label class="check-item"><input type="radio" name="imgs" value="Sí — las adjunto"> Sí — las adjunto</label>
+          <label class="check-item"><input type="radio" name="imgs" value="No — usar banco de imágenes"> No — banco de imágenes</label>
+          <label class="check-item"><input type="radio" name="imgs" value="Necesito sesión fotográfica"> Necesito sesión fotográfica</label>
+        </div>
+      </div>
+      <div class="fg">
+        <label>Formato requerido</label>
+        <div class="check-wrap">
+          <label class="check-item"><input type="radio" name="formato" value="Solo digital"> Solo digital</label>
+          <label class="check-item"><input type="radio" name="formato" value="Solo impreso"> Solo impreso</label>
+          <label class="check-item"><input type="radio" name="formato" value="Ambos"> Ambos</label>
+        </div>
+      </div>
+      <div class="fg"><label>Observaciones adicionales</label><textarea id="req_obs"></textarea></div>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <div class="form-card-header">04 · Fechas de entrega</div>
+    <div class="form-card-body">
+      <div class="grid3">
+        <div class="fg"><label>Fecha límite real *</label><input id="fecha_limite" type="date"></div>
+        <div class="fg"><label>Hora límite</label><input id="hora_limite" type="time"></div>
+        <div class="fg">
+          <label>¿Es flexible?</label>
+          <div class="check-wrap" style="margin-top:4px;">
+            <label class="check-item"><input type="radio" name="flexible" value="Sí"> Sí</label>
+            <label class="check-item"><input type="radio" name="flexible" value="No"> No</label>
+          </div>
+        </div>
+      </div>
+      <div class="fg"><label>¿Para qué evento o actividad?</label><input id="evento" type="text" placeholder="Nombre del evento o actividad"></div>
+      <div class="fg"><label>Fecha de publicación / distribución</label><input id="fecha_publicacion" type="date"></div>
+      <div class="note">Indique siempre la fecha real. Las solicitudes no generan automáticamente prioridad urgente.</div>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <div class="form-card-header">05 · Público y canales</div>
+    <div class="form-card-body">
+      <div class="fg">
+        <label>Público objetivo</label>
+        <div class="check-wrap">
+          <label class="check-item"><input type="checkbox" name="publico" value="Estudiantes activos"> Estudiantes activos</label>
+          <label class="check-item"><input type="checkbox" name="publico" value="Prospectos de grado"> Prospectos de grado</label>
+          <label class="check-item"><input type="checkbox" name="publico" value="Prospectos EC/postgrado"> Prospectos EC/postgrado</label>
+          <label class="check-item"><input type="checkbox" name="publico" value="Egresados"> Egresados</label>
+          <label class="check-item"><input type="checkbox" name="publico" value="Profesionales externos"> Profesionales externos</label>
+          <label class="check-item"><input type="checkbox" name="publico" value="Docentes y personal académico"> Docentes y personal académico</label>
+          <label class="check-item"><input type="checkbox" name="publico" value="Instituciones y empresas"> Instituciones y empresas</label>
+          <label class="check-item"><input type="checkbox" name="publico" value="Público general"> Público general</label>
+        </div>
+      </div>
+      <div class="fg">
+        <label>Canales preferidos</label>
+        <div class="check-wrap">
+          <label class="check-item"><input type="checkbox" name="canales" value="Instagram"> Instagram</label>
+          <label class="check-item"><input type="checkbox" name="canales" value="Facebook"> Facebook</label>
+          <label class="check-item"><input type="checkbox" name="canales" value="WhatsApp institucional"> WhatsApp institucional</label>
+          <label class="check-item"><input type="checkbox" name="canales" value="Correo electrónico"> Correo electrónico</label>
+          <label class="check-item"><input type="checkbox" name="canales" value="Cartelera física"> Cartelera física</label>
+          <label class="check-item"><input type="checkbox" name="canales" value="Web institucional"> Web institucional</label>
+          <label class="check-item"><input type="checkbox" name="canales" value="Impreso para distribución"> Impreso para distribución</label>
+        </div>
+      </div>
+      <div class="fg">
+        <label>Zona geográfica</label>
+        <div class="check-wrap">
+          <label class="check-item"><input type="checkbox" name="zona" value="Solo campus"> Solo campus</label>
+          <label class="check-item"><input type="checkbox" name="zona" value="San Cristóbal"> San Cristóbal</label>
+          <label class="check-item"><input type="checkbox" name="zona" value="Santo Domingo"> Santo Domingo</label>
+          <label class="check-item"><input type="checkbox" name="zona" value="Nacional"> Nacional</label>
+          <label class="check-item"><input type="checkbox" name="zona" value="Internacional"> Internacional</label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <div class="form-card-header">06 · Archivos adjuntos y referencias</div>
+    <div class="form-card-body">
+      <div class="fg">
+        <label>¿Qué adjunta a esta solicitud?</label>
+        <div class="check-wrap">
+          <label class="check-item"><input type="checkbox" name="adjuntos" value="Texto / copy redactado"> Texto / copy</label>
+          <label class="check-item"><input type="checkbox" name="adjuntos" value="Imágenes o fotografías"> Imágenes / fotografías</label>
+          <label class="check-item"><input type="checkbox" name="adjuntos" value="Logo o identidad del programa"> Logo / identidad</label>
+          <label class="check-item"><input type="checkbox" name="adjuntos" value="Referencia visual o inspiración"> Referencia visual</label>
+          <label class="check-item"><input type="checkbox" name="adjuntos" value="Versión anterior del material"> Versión anterior</label>
+          <label class="check-item"><input type="checkbox" name="adjuntos" value="No adjunto nada"> No adjunto nada</label>
+        </div>
+      </div>
+      <div class="fg"><label>Nombre(s) de archivos adjuntos</label><input id="archivos_nombres" type="text" placeholder="Liste los archivos"></div>
+      <div class="fg"><label>Referencias de estilo o color</label><textarea id="referencias" placeholder="Links, colores, indicaciones visuales"></textarea></div>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <div class="form-card-header">07 · Observaciones y contexto adicional</div>
+    <div class="form-card-body">
+      <div class="fg"><textarea id="observaciones_gen" style="min-height:100px;" placeholder="Información adicional relevante..."></textarea></div>
+    </div>
+  </div>
+
+  <div class="form-actions">
+    <button class="btn-primary" onclick="guardarSolicitud()">Guardar solicitud</button>
+    <button class="btn-secondary" onclick="limpiarFormulario()">Limpiar formulario</button>
+  </div>
+</div>
+
+<!-- ══ REGISTRO ══════════════════════════════════════════════════════════ -->
+<div id="view-registro" class="view">
+  <div class="toolbar">
+    <input type="text" id="filtro-buscar" placeholder="Buscar por área, responsable o programa..." oninput="renderTabla()">
+    <select id="filtro-tipo" onchange="renderTabla()">
+      <option value="">Todos los tipos</option>
+      <option value="Lanzamiento de oferta académica">Lanzamientos</option>
+      <option value="Requisición general de comunicación">Requisiciones generales</option>
+    </select>
+    <select id="filtro-prioridad" onchange="renderTabla()">
+      <option value="">Todas las prioridades</option>
+      <option value="P1">🔴 P1 — Urgente</option>
+      <option value="P2">🟡 P2 — Alta</option>
+      <option value="P3">🔵 P3 — Normal</option>
+      <option value="P4">⚪ P4 — Planificado</option>
+    </select>
+    <button class="btn-secondary" onclick="exportarCSV()">⬇ Exportar CSV</button>
+    <button class="btn-secondary" onclick="exportarJSON()">⬇ Exportar JSON</button>
+  </div>
+  <div class="table-wrap">
+    <table id="tabla-solicitudes">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Fecha</th>
+          <th>Área</th>
+          <th>Responsable</th>
+          <th>Tipo</th>
+          <th>Programa / Pieza</th>
+          <th>Prioridad</th>
+          <th>Fecha límite</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div id="empty-state" class="empty-state" style="display:none;">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="1.5"><path d="M9 12h6M9 16h4M4 6h16M4 6v14a2 2 0 002 2h12a2 2 0 002-2V6"/></svg>
+      <p>No hay solicitudes registradas aún.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ESTADÍSTICAS ══════════════════════════════════════════════════════ -->
+<div id="view-estadisticas" class="view">
+  <div class="stats-grid" id="stats-grid"></div>
+  <div id="stats-detalle"></div>
+</div>
+
+<script>
+const STORAGE_KEY = 'uniremhos_solicitudes';
+
+const PRIORIDADES = {
+  'Rectoría':                     { nivel:'P1', titulo:'Urgente', desc:'Comunicados oficiales, resoluciones, actos institucionales', tiempo:'≤ 24 horas', cls:'p1', bg:'p1-bg' },
+  'Vicerrectoría Académica':      { nivel:'P1', titulo:'Urgente', desc:'Comunicados oficiales, resoluciones, actos institucionales', tiempo:'≤ 24 horas', cls:'p1', bg:'p1-bg' },
+  'Vicerrectoría Administrativa': { nivel:'P1', titulo:'Urgente', desc:'Comunicados oficiales, resoluciones, actos institucionales', tiempo:'≤ 24 horas', cls:'p1', bg:'p1-bg' },
+  'Educación Continua y Promoción':{ nivel:'P2', titulo:'Alta', desc:'Campañas de captación, redes sociales, ferias, programas activos', tiempo:'≤ 48 horas', cls:'p2', bg:'p2-bg' },
+  'Sin fecha crítica — trabajo planificado':{ nivel:'P4', titulo:'Planificado', desc:'Manuales, catálogos, rediseños, plantillas', tiempo:'Agenda semanal', cls:'p4', bg:'p4-bg' },
+};
+
+function getPrioridad(area) {
+  if (!area) return { nivel:'—', titulo:'Selecciona un área', desc:'', tiempo:'', cls:'p4', bg:'p4-bg' };
+  if (PRIORIDADES[area]) return PRIORIDADES[area];
+  // Default para decanatos y escuelas
+  return { nivel:'P3', titulo:'Normal', desc:'Materiales académicos, flyers, reconocimientos', tiempo:'≤ 72 horas', cls:'p3', bg:'p3-bg' };
+}
+
+function calcularPrioridad() {
+  const area = document.getElementById('area').value;
+  const banner = document.getElementById('priority-banner');
+  if (!area) { banner.style.display = 'none'; return; }
+  const p = getPrioridad(area);
+  banner.style.display = 'flex';
+  banner.className = 'priority-banner ' + p.bg;
+  banner.innerHTML = \`
+    <div class="priority-level">\${p.nivel}</div>
+    <div class="priority-info">
+      <div class="priority-title">\${p.titulo} — \${area}</div>
+      <div class="priority-desc">\${p.desc}</div>
+      <div class="priority-time">⏱ Tiempo de entrega: \${p.tiempo}</div>
+    </div>
+  \`;
+}
+
+function getPrioridadBadge(area) {
+  const p = getPrioridad(area);
+  return \`<span class="badge \${p.cls}" style="padding:3px 8px;border-radius:12px;font-size:11px;font-weight:600;">\${p.nivel}</span>\`;
+}
+
+
+function getData() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch { return []; }
+}
+function saveData(d) { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
+
+function getChecked(name) {
+  return [...document.querySelectorAll(`input[name="${name}"]:checked`)].map(i => i.value).join(', ');
+}
+function getRadio(name) {
+  const el = document.querySelector(`input[name="${name}"]:checked`);
+  return el ? el.value : '';
+}
+function val(id) { const el = document.getElementById(id); return el ? el.value.trim() : ''; }
+
+function toggleSections() {
+  const tipo = getRadio('tipo');
+  document.getElementById('sec-03a').classList.toggle('visible', tipo === 'Lanzamiento de oferta académica');
+  document.getElementById('sec-03b').classList.toggle('visible', tipo === 'Requisición general de comunicación');
+}
+
+const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbz1gjJ_qd0Xfhy9kFa34FxZBfXiqnWv20Aga29UCYX05ffV4BNPsPolN2V8oG4xHslx/exec';
+
+async function guardarSolicitud() {
+  const area = val('area'), responsable = val('responsable'),
+        correo = val('correo'), fecha_limite = val('fecha_limite'), tipo = getRadio('tipo');
+
+  if (!area || !responsable || !correo || !fecha_limite || !tipo) {
+    alert('Por favor completa los campos obligatorios: Área, Responsable, Correo, Fecha límite y Tipo de solicitud.');
+    return;
+  }
+
+  const prioridad = getPrioridad(area);
+  const solicitud = {
+    fecha_registro: new Date().toISOString(),
+    prioridad: prioridad.nivel + ' — ' + prioridad.titulo,
+    area, fecha_solicitud: val('fecha_solicitud'), responsable,
+    whatsapp: val('whatsapp'), correo, tipo,
+    modalidad: getChecked('modalidad'), dirigido_a: getChecked('dirigido'),
+    prog_nombre: val('prog_nombre'), prog_escuela: val('prog_escuela'),
+    prog_descripcion: val('prog_descripcion'), prog_inicio: val('prog_inicio'),
+    prog_duracion: val('prog_duracion'), prog_horario: val('prog_horario'),
+    prog_costo: val('prog_costo'), prog_facilitador: val('prog_facilitador'),
+    prog_cupo: val('prog_cupo'), prog_requisitos: val('prog_requisitos'),
+    prog_puntos: val('prog_puntos'), prog_prereq: val('prog_prereq'),
+    prog_obs: val('prog_obs'),
+    tipo_pieza: getChecked('pieza'), req_proposito: val('req_proposito'),
+    texto_status: getRadio('texto_status'), req_texto: val('req_texto'),
+    imagenes: getRadio('imgs'), formato: getRadio('formato'),
+    req_obs: val('req_obs'),
+    fecha_limite, hora_limite: val('hora_limite'),
+    fecha_publicacion: val('fecha_publicacion'), flexible: getRadio('flexible'),
+    evento: val('evento'),
+    publico_objetivo: getChecked('publico'), canales: getChecked('canales'),
+    zona: getChecked('zona'),
+    adjuntos: getChecked('adjuntos'), archivos_nombres: val('archivos_nombres'),
+    referencias: val('referencias'), observaciones: val('observaciones_gen'),
+  };
+
+  // Guardar localmente también como respaldo
+  const data = getData();
+  data.push({ id: Date.now(), ...solicitud });
+  saveData(data);
+
+  // Mostrar estado de envío
+  const btn = document.querySelector('.btn-primary');
+  btn.textContent = 'Enviando...';
+  btn.disabled = true;
+
+  try {
+    await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(solicitud)
+    });
+
+    limpiarFormulario();
+    btn.textContent = 'Guardar solicitud';
+    btn.disabled = false;
+
+    showToast('✓ Solicitud enviada a Google Sheets correctamente.');
+  } catch (err) {
+    btn.textContent = 'Guardar solicitud';
+    btn.disabled = false;
+    limpiarFormulario();
+    showToast('Guardado localmente. Sin conexión al servidor.');
+    console.error('Webhook error:', err);
+  }
+
+  showTab('registro');
+}
+
+function limpiarFormulario() {
+  document.querySelectorAll('#view-nueva input[type=text], #view-nueva input[type=email], #view-nueva input[type=date], #view-nueva input[type=time], #view-nueva textarea').forEach(el => el.value = '');
+  document.querySelectorAll('#view-nueva input[type=checkbox], #view-nueva input[type=radio]').forEach(el => el.checked = false);
+  document.getElementById('sec-03a').classList.remove('visible');
+  document.getElementById('sec-03b').classList.remove('visible');
+}
+
+function eliminarSolicitud(id) {
+  if (!confirm('¿Eliminar esta solicitud?')) return;
+  saveData(getData().filter(s => s.id !== id));
+  renderTabla();
+}
+
+function renderTabla() {
+  const buscar = document.getElementById('filtro-buscar').value.toLowerCase();
+  const tipo = document.getElementById('filtro-tipo').value;
+  const prioFiltro = document.getElementById('filtro-prioridad').value;
+  let data = getData().filter(s => {
+    const match = (s.area + s.responsable + s.prog_nombre + s.tipo).toLowerCase().includes(buscar);
+    const tipoOk = !tipo || s.tipo === tipo;
+    const prioOk = !prioFiltro || getPrioridad(s.area).nivel === prioFiltro;
+    return match && tipoOk && prioOk;
+  });
+  const tbody = document.getElementById('tbody');
+  const empty = document.getElementById('empty-state');
+  tbody.innerHTML = '';
+  if (!data.length) { empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  data.forEach((s, i) => {
+    const badge = s.tipo === 'Lanzamiento de oferta académica'
+      ? `<span class="badge badge-lanzamiento">Lanzamiento</span>`
+      : `<span class="badge badge-general">Requisición</span>`;
+    const prog = s.prog_nombre || s.tipo_pieza || '—';
+    tbody.innerHTML += `<tr>
+      <td>${i+1}</td>
+      <td>${(s.fecha_solicitud || s.fecha_registro?.slice(0,10) || '—')}</td>
+      <td title="${s.area}">${s.area}</td>
+      <td title="${s.responsable}">${s.responsable}</td>
+      <td>${badge}</td>
+      <td title="${prog}">${prog.length > 30 ? prog.slice(0,30)+'…' : prog}</td>
+      <td>${getPrioridadBadge(s.area)}</td>
+      <td>${s.fecha_limite || '—'}</td>
+      <td><div class="td-actions">
+        <button class="btn-secondary" style="padding:4px 10px;font-size:11px;" onclick="verDetalle(${s.id})">Ver</button>
+        <button class="btn-danger" onclick="eliminarSolicitud(${s.id})">✕</button>
+      </div></td>
+    </tr>`;
+  });
+}
+
+function verDetalle(id) {
+  const s = getData().find(x => x.id === id);
+  if (!s) return;
+  const lines = Object.entries(s).filter(([k,v]) => v && k !== 'id' && k !== 'fecha_registro')
+    .map(([k,v]) => `<tr><td style="font-weight:600;white-space:nowrap;padding:6px 12px;color:#64748B;min-width:180px;">${k.replace(/_/g,' ')}</td><td style="padding:6px 12px;">${v}</td></tr>`)
+    .join('');
+  const w = window.open('', '_blank', 'width=700,height=600');
+  w.document.write(`<html><head><title>Solicitud</title><style>body{font-family:Arial,sans-serif;font-size:13px;padding:20px;}table{border-collapse:collapse;width:100%;}tr{border-bottom:1px solid #eee;}h2{color:#1F4E79;}</style></head><body><h2>Solicitud · ${s.area}</h2><table>${lines}</table></body></html>`);
+}
+
+function renderStats() {
+  const data = getData();
+  const total = data.length;
+  const lanzamientos = data.filter(s => s.tipo === 'Lanzamiento de oferta académica').length;
+  const generales = total - lanzamientos;
+  const areas = [...new Set(data.map(s => s.area))].length;
+  document.getElementById('stats-grid').innerHTML = `
+    <div class="stat-card"><div class="num">${total}</div><div class="lbl">Total solicitudes</div></div>
+    <div class="stat-card"><div class="num" style="color:#1D4ED8;">${lanzamientos}</div><div class="lbl">Lanzamientos académicos</div></div>
+    <div class="stat-card"><div class="num" style="color:#7C3AED;">${generales}</div><div class="lbl">Requisiciones generales</div></div>
+    <div class="stat-card"><div class="num" style="color:#16A34A;">${areas}</div><div class="lbl">Áreas distintas</div></div>
+  `;
+  if (total === 0) {
+    document.getElementById('stats-detalle').innerHTML = '<p style="color:#94A3B8;text-align:center;padding:24px;">Sin datos aún.</p>';
+    return;
+  }
+  const byArea = {};
+  data.forEach(s => { byArea[s.area] = (byArea[s.area]||0)+1; });
+  const rows = Object.entries(byArea).sort((a,b)=>b[1]-a[1])
+    .map(([k,v]) => `<tr><td style="padding:8px 14px;">${k}</td><td style="padding:8px 14px;font-weight:600;">${v}</td><td style="padding:8px 14px;"><div style="background:#2E75B6;height:8px;border-radius:4px;width:${Math.round(v/total*200)}px;"></div></td></tr>`)
+    .join('');
+  document.getElementById('stats-detalle').innerHTML = `
+    <div style="background:white;border:1px solid #E2E8F0;border-radius:10px;overflow:hidden;">
+      <div style="background:#1F4E79;color:white;padding:10px 18px;font-size:13px;font-weight:600;">Solicitudes por área</div>
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead><tr style="background:#F5F7FA;"><th style="padding:8px 14px;text-align:left;color:#64748B;">Área</th><th style="padding:8px 14px;text-align:left;color:#64748B;">Total</th><th></th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+}
+
+function exportarCSV() {
+  const data = getData();
+  if (!data.length) { alert('No hay datos para exportar.'); return; }
+  const cols = Object.keys(data[0]);
+  const csv = [cols.join(','), ...data.map(row => cols.map(c => `"${(row[c]||'').toString().replace(/"/g,'""')}"`).join(','))].join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,\uFEFF' + encodeURIComponent(csv);
+  a.download = `solicitudes_uniremhos_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
+function exportarJSON() {
+  const data = getData();
+  if (!data.length) { alert('No hay datos para exportar.'); return; }
+  const a = document.createElement('a');
+  a.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data, null, 2));
+  a.download = `solicitudes_uniremhos_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+}
+
+function showTab(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  document.querySelectorAll('.tab').forEach(t => { if(t.textContent.toLowerCase().includes(name === 'nueva' ? 'nueva' : name === 'registro' ? 'registro' : 'estad')) t.classList.add('active'); });
+  if (name === 'registro') renderTabla();
+  if (name === 'estadisticas') renderStats();
+}
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.className = 'success-toast';
+  t.textContent = '✓  ' + msg;
+  document.body.appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 400); }, 2500);
+}
+
+// Init
+document.querySelector('#view-nueva input[type=date]').valueAsDate = new Date();
+</script>
+</body>
+</html>
